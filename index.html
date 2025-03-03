@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termékek listázása</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        .green {
+            color: green;
+        }
+        .red {
+            color: red;
+        }
+        img {
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Termékek listája</h1>
+    <table id="termekekTable">
+        <thead>
+            <tr>
+                <th>Név</th>
+                <th>Kategória</th>
+                <th>Kép</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Véletlenszerűen kiválasztott termék</h2>
+    <div id="randomTermek"></div>
+
+    <h2>Furniture kategóriába tartozó termékek</h2>
+    <ol id="furnitureList"></ol>
+
+    <h2>Statisztika</h2>
+    <ul id="statisztika"></ul>
+
+    <h2>Leo Rivera megjegyzései</h2>
+    <ul id="leoMegjegyzesek"></ul>
+
+    <script>
+        const URL = 'https://dummyjson.com/products';
+
+        async function fetchData() {
+            try {
+                const response = await fetch(URL);
+                const data = await response.json();
+                const termekek = data.products;
+
+                // 1. Táblázatban az első 10 termék
+                displayTermekek(termekek.slice(0, 10));
+
+                // 2. Véletlenszerű termék
+                displayRandomTermek(termekek);
+
+                // 3. Furniture kategóriába tartozó termékek
+                displayFurnitureTermekek(termekek);
+
+                // 4. Statisztika
+                displayStatisztika(termekek);
+
+                // 5. Leo Rivera megjegyzései
+                displayLeoMegjegyzesek(termekek);
+            } catch (error) {
+                console.error('Hiba történt az adatok lekérésekor:', error);
+            }
+        }
+
+        function displayTermekek(termekek) {
+            const tbody = document.querySelector('#termekekTable tbody');
+            tbody.innerHTML = '';
+            termekek.forEach(termek => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${termek.title}</td>
+                    <td>${termek.category}</td>
+                    <td><img src="${termek.thumbnail}" alt="${termek.title}"></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayRandomTermek(termekek) {
+            const randomTermek = termekek[Math.floor(Math.random() * termekek.length)];
+            const randomTermekDiv = document.getElementById('randomTermek');
+            randomTermekDiv.innerHTML = `
+                <p><strong>Név:</strong> ${randomTermek.title}</p>
+                <p><strong>Kategória:</strong> ${randomTermek.category}</p>
+                <p><strong>Ár:</strong> ${randomTermek.price}</p>
+                <p><strong>Leírás:</strong> ${randomTermek.description}</p>
+                <p><strong>Értékelés:</strong> ${randomTermek.rating}</p>
+                <p><strong>Készlet:</strong> ${randomTermek.stock}</p>
+            `;
+        }
+
+        function displayFurnitureTermekek(termekek) {
+            const furnitureTermekek = termekek.filter(termek => termek.category === 'furniture');
+            const furnitureList = document.getElementById('furnitureList');
+            furnitureList.innerHTML = '';
+
+            const prices = furnitureTermekek.map(termek => termek.price);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+
+            furnitureTermekek.forEach((termek, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${termek.title}`;
+                if (termek.price === minPrice) {
+                    li.classList.add('green');
+                }
+                if (termek.price === maxPrice) {
+                    li.classList.add('red');
+                }
+                furnitureList.appendChild(li);
+            });
+        }
+
+        function displayStatisztika(termekek) {
+            const atlagAr = termekek.reduce((sum, termek) => sum + termek.price, 0) / termekek.length;
+            const legolcsobbTermek = termekek.reduce((min, termek) => termek.price < min.price ? termek : min);
+            const legdragabbTermek = termekek.reduce((max, termek) => termek.price > max.price ? termek : max);
+
+            const statisztikaList = document.getElementById('statisztika');
+            statisztikaList.innerHTML = `
+                <li>Termékek átlagos ára: ${atlagAr.toFixed(2)}</li>
+                <li>Legolcsóbb termék ára: <span class="green">${legolcsobbTermek.price}</span></li>
+                <li>Legdrágább termék neve: <span class="red">${legdragabbTermek.title}</span></li>
+                <li>Hány darab termék van: ${termekek.length}</li>
+            `;
+        }
+
+        function displayLeoMegjegyzesek(termekek) {
+            const leoMegjegyzesekList = document.getElementById('leoMegjegyzesek');
+            leoMegjegyzesekList.innerHTML = '<li>Nincs elérhető adat.</li>';
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
