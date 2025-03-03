@@ -138,8 +138,14 @@
         }
 
         function displayLeoMegjegyzesek(termekek) {
+            const leoMegjegyzesek = termekek.filter(termek => termek.rating);
             const leoMegjegyzesekList = document.getElementById('leoMegjegyzesek');
-            leoMegjegyzesekList.innerHTML = '<li>Nincs elérhető adat.</li>';
+            leoMegjegyzesekList.innerHTML = '';
+            leoMegjegyzesek.forEach(termek => {
+                const li = document.createElement('li');
+                li.textContent = `${termek.title} - ${termek.rating}`;
+                leoMegjegyzesekList.appendChild(li);
+           });
         }
 
         fetchData();
